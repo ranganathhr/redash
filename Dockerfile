@@ -51,6 +51,9 @@ WORKDIR /app
 
 # We first copy only the requirements file, to avoid rebuilding on every file
 # change.
+RUN wget https://s3.amazonaws.com/paid-qubole/jdbc/qds-jdbc-2.3.2.jar
+RUN chmod 775 install_java.sh qds-jdbc-2.3.2.jar
+RUN bash install_java.sh
 COPY requirements.txt requirements_bundles.txt requirements_dev.txt requirements_all_ds.txt ./
 RUN pip install -r requirements.txt -r requirements_dev.txt
 RUN if [ "x$skip_ds_deps" = "x" ] ; then pip install -r requirements_all_ds.txt ; else echo "Skipping pip install -r requirements_all_ds.txt" ; fi
