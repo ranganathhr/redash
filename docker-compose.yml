@@ -21,7 +21,7 @@ services:
       REDASH_RATELIMIT_ENABLED: "false"
       REDASH_MAIL_DEFAULT_SENDER: redash@example.com
       REDASH_MAIL_SERVER: email
-      QUBOLE_JDBC_JAR_PATH: "/Users/ranganathhr/jdbc/qds-jdbc-2.3.2.jar"
+      QUBOLE_JDBC_JAR_PATH: "/app/qds-jdbc-2.3.2.jar"
   scheduler:
     build: .
     command: dev_scheduler
@@ -51,7 +51,7 @@ services:
       REDASH_DATABASE_URL: "postgresql://postgres@postgres/postgres"
       REDASH_MAIL_DEFAULT_SENDER: redash@example.com
       REDASH_MAIL_SERVER: email
-      QUBOLE_JDBC_JAR_PATH: "/Users/ranganathhr/jdbc/qds-jdbc-2.3.2.jar"
+      QUBOLE_JDBC_JAR_PATH: "/app/qds-jdbc-2.3.2.jar"
   redis:
     image: redis:3-alpine
     restart: unless-stopped
