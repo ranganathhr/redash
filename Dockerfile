@@ -51,11 +51,12 @@ WORKDIR /app
 
 # We first copy only the requirements file, to avoid rebuilding on every file
 # change.
-RUN apt-get install -y python-software-properties debconf-utils
-RUN add-apt-repository -y ppa:webupd8team/java
-RUN apt-get update
-RUN "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections
-RUN apt-get install -y oracle-java8-installer
+
+# Install java
+COPY jre-8u241-linux-x64.tar.gz ./
+RUN gunzip jre-8u241-linux-x64.tar.gz
+RUN tar -xf jre-8u241-linux-x64.tar
+
 COPY requirements.txt requirements_bundles.txt requirements_dev.txt requirements_all_ds.txt ./
 RUN pip install -r requirements.txt -r requirements_dev.txt
 RUN if [ "x$skip_ds_deps" = "x" ] ; then pip install -r requirements_all_ds.txt ; else echo "Skipping pip install -r requirements_all_ds.txt" ; fi

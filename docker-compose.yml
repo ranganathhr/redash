@@ -22,6 +22,8 @@ services:
       REDASH_MAIL_DEFAULT_SENDER: redash@example.com
       REDASH_MAIL_SERVER: email
       QUBOLE_JDBC_JAR_PATH: "/app/qds-jdbc-2.3.2.jar"
+      JAVA_HOME: "/app/jre1.8.0_241"
+      PATH: "/app/jre1.8.0_241/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   scheduler:
     build: .
     command: dev_scheduler
@@ -52,6 +54,8 @@ services:
       REDASH_MAIL_DEFAULT_SENDER: redash@example.com
       REDASH_MAIL_SERVER: email
       QUBOLE_JDBC_JAR_PATH: "/app/qds-jdbc-2.3.2.jar"
+      JAVA_HOME: "/app/jre1.8.0_241"
+      PATH: "/app/jre1.8.0_241/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   redis:
     image: redis:3-alpine
     restart: unless-stopped
@@ -64,6 +68,8 @@ services:
       - "15432:5432"
     command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
     restart: unless-stopped
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
   email:
     image: djfarrelly/maildev
     ports:
