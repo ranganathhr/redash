@@ -30,7 +30,7 @@ class Qubole(BaseQueryRunner):
             "properties": {
                 "query_type": {
                     "type": "string",
-                    "title": "Query Type (quantum / presto / hive)",
+                    "title": "Query Type (presto / hive)",
                     "default": "hive",
                 },
                 "endpoint": {
@@ -89,18 +89,10 @@ class Qubole(BaseQueryRunner):
 
         engine = db.create_engine(sqlalchemy_url)
         resultproxy = engine.execute(query)
-        results = resultproxy.fetchall()
+        columns = resultproxy.keys()
+        rows = resultproxy.fetchall()
 
         error = None
-
-        data = results.split("\r\n")
-        columns = self.fetch_columns(
-            [(i, TYPE_STRING) for i in data.pop(0).split("\t")]
-        )
-        rows = [
-            dict(zip((column["name"] for column in columns), row.split("\t")))
-            for row in data
-        ]
 
         json_data = json_dumps({"columns": columns, "rows": rows})
         return json_data, error
