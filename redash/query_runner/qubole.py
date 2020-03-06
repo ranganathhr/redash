@@ -5,6 +5,7 @@ import sqlalchemy as db
 from redash.query_runner import (
     BaseQueryRunner,
     register,
+    JobTimeoutException,
     TYPE_STRING,
 )
 from redash.utils import json_dumps
@@ -74,27 +75,37 @@ class Qubole(BaseQueryRunner):
         endpoint = self.configuration.get("endpoint")
         cluster_label = self.configuration.get("cluster")
         query_type = self.configuration.get("query_type", "hive")
-        url = str(cluster_label) + "?endpoint=" + str(endpoint) + ";password=" + api_token + ";useS3=true"
+        url = str(cluster_label) + "?endpoint=" + str(endpoint) + ";password=" + api_token + ";useS3=True"
 
-        if query_type == "hive":
-            sqlalchemy_url = "qubole+hive://hive/" + str(url)
-        elif query_type == "presto":
-            sqlalchemy_url = "qubole+presto://presto/" + str(url)
-        else:
-            raise Exception(
-                "Invalid Query Type:%s.\
-                    It must be : hive / presto."
-                % self.configuration.get("query_type")
-            )
+        try:
+            if query_type == "hive":
+                sqlalchemy_url = "qubole+hive://hive/" + str(url)
+            elif query_type == "presto":
+                sqlalchemy_url = "qubole+presto://presto/" + str(url)
+            else:
+                raise Exception(
+                    "Invalid Query Type:%s.\
+                        It must be : hive / presto."
+                    % self.configuration.get("query_type")
+                )
 
-        engine = db.create_engine(sqlalchemy_url)
-        resultproxy = engine.execute(query)
-        columns = resultproxy.keys()
-        rows = resultproxy.fetchall()
+            error = None
 
-        error = None
+            engine = db.create_engine(sqlalchemy_url)
+            result = engine.execute(query)
 
-        json_data = json_dumps({"columns": columns, "rows": rows})
+            columns = self.fetch_columns(
+                    [(i, TYPE_STRING) for i in result.keys()]
+                )
+            rows = [dict(zip((column["name"] for column in columns), row))
+                    for row in (tuple(tuple((str(value) for value in row_temp)) for row_temp in result.fetchall()))
+                    ]
+
+            json_data = json_dumps({"columns": columns, "rows": rows})
+        except (KeyboardInterrupt, JobTimeoutException):
+            logging.info("Sending KILL signal to Qubole Command")
+            raise
+
         return json_data, error
 
     def get_schema(self, get_stats=False):
